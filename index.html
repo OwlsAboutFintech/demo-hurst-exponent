@@ -1,0 +1,250 @@
+<!doctype html>
+<html>
+<script type="text/javascript">
+window.onbeforeunload = function() {
+    window.scrollTo(0, 0);
+}
+</script>
+
+<head>
+    <meta charset="utf-8" />
+    <title>赫斯特指數值計算器 Hurst Exponent Calculator</title>
+</head>
+
+<body>
+    <div style="margin:0px auto;width:61.8%;">
+        <br />
+        <h1 align="center">赫斯特指數值計算器 Hurst Exponent Calculator</h1>
+        <br />
+        <p><b>赫斯特指數(Hurst Exponent) </b>可以特別來評估金融市場資料 <b>波動叢聚 (Volatility Clustering)</b> 的特性</p>
+        <br/>
+        <p>赫斯特指數若大於 0.5 ，越接近 1 就代表可能會觀察到更明顯的波動叢聚現象，但波動的均值回歸週期越長且不固定，適合看做隨機波動</p>
+        <p>赫斯特指數若接近 0.5 ，代表資料的前後波動沒有相關性，資料的漲跌幅度可能幾乎是隨機變化，較適合看作是常數波動</p>
+        <p>赫斯特指數若小於 0.5 ，越接近 0 也可以觀察到些微的波動叢聚現象，但此時波動的均值回歸週期越短且固定，不適合看做隨機波動</p>
+        <br/>
+        <p>赫斯特指數有許多種計算方法，且容易受到資料量影響，本計算器以 R/S 法計算，以 2 為底數進行計算</p>
+        <p>推薦選擇不同標的，但相同的時間尺度且資料大致都在 512 至 4096 筆左右研究</p>
+        <p>依上述推薦計算：</p>
+        <p>1. 在 0.3 - 0.5 可看做是隨機遊走（Random Walk）</p>
+        <p>2. 在 0.5 - 0.8 可嘗試建立波動率模型，如 GARCH</p>
+        <p>3. 在 0.8 以上可嘗試建立傳統時間序列模型，如 ARIMA</p>
+        <br/>
+        <p>請選擇一個檔案，內容為只有一欄的數字序列，推薦放純粹價格的資料</p>
+        <p>請參考這個 <a href="#">csv 範例</a>，並上傳：</p>
+        <div id="inputs" class="clearfix">
+            <input type="file" id="files" name="files[]" multiple />
+        </div>
+        <br />
+        <br />
+        <hr />
+        <br />
+        <div style="font-size:35px" id="HurstExponentValue"></div>
+        <br />
+        <canvas height="150px" id="HurstExponentChart"></canvas>
+        <br />
+        <hr />
+        <canvas height="81px" id="UploadDataChart"></canvas>
+        <br />
+        <canvas height="36px" id="DataLogChangeChart"></canvas>
+    </div>
+</body>
+<script src="chart-2.7.1.min.js"></script>
+<script src="math-3.16.5.min.js"></script>
+<script src="jquery-3.2.1.min.js"></script>
+<script src="jquery-csv-0.8.3.min.js"></script>
+<script src="linear-regression.js"></script>
+<script src="hurst-exponent.js"></script>
+<script>
+
+$(document).ready(function(global) {
+    $('#files').bind('change', handleFileSelect);
+});
+
+function get_weight(global) {
+    lenet_get_weight(net);
+}
+
+
+function handleFileSelect(evt, global) {
+    printTable(evt.target.files[0], global);
+}
+
+var net = null; // declared outside -> global variable in window scope
+function clickLog(global) {
+    var batch = data_processing(global_data, global_label, 1, 40, 1);
+    var fitness_batch = data_processing(global_data, global_label, 1, 40, 1);
+    var batch_data = batch[0];
+    var batch_label = batch[1];
+    var batch_index = batch[2];
+    var fitness_batch_data = fitness_batch[0];
+    var batch_gramian_matrix = gramian_cos_batch(batch_data);
+    var fitness_batch_matrix = gramian_cos_batch(fitness_batch_data);
+    lenet_start(net, batch_gramian_matrix, fitness_batch_matrix, batch_label, batch_index);
+}
+
+
+function printTable(file, global) {
+
+    var reader = new FileReader();
+    reader.readAsText(file);
+    reader.onload = function(event) {
+
+        // 讀取 csv 資料
+        // --------------------------------------------------------------------------------
+        var filename = file.name.split('.').slice(0, -1).join('.');
+        var csv = event.target.result;
+        var data = $.csv.toArrays(csv);
+        var dim_data = data[0].length;
+        var n_data = data.length;
+        var data_matrix = math.zeros(n_data, dim_data);
+        var html = '';
+        for (var row in data) {
+            html += '<tr>\r\n';
+            for (var item in data[row]) {
+                html += '<td>' + data[row][item] + '</td>\r\n';
+                data_matrix = math.subset(data_matrix, math.index(parseInt(row), parseInt(item)), parseFloat(data[row][item]));
+            }
+            html += '</tr>\r\n';
+        }
+        $('#contents').html(html);
+
+        // 讀取 csv 資料
+        // --------------------------------------------------------------------------------
+        var data_index = Array.from(Array(n_data).keys());
+        var data_value = data_matrix.subset(math.index(data_index, 0));
+        var data = math.transpose(data_value)._data[0];
+
+        var data_config = {
+            type: 'line',
+            data: {
+                labels: data_index,
+                datasets: [{
+                    label: filename,
+                    borderColor: 'rgba(9, 9, 196, 0.25)',
+                    backgroundColor: 'rgba(9, 9, 196, 0.25)',
+                    radius: 0,
+                    fill: false,
+                    data: data
+                }]
+            },
+            options: {
+                scales: {
+                    xAxes: [{
+                        display: false
+                    }]
+                }
+            }
+        };
+        var data_chart = $("#UploadDataChart").get(0).getContext("2d");
+        new Chart(data_chart, data_config);
+
+        // 計算對數差分
+        // --------------------------------------------------------------------------------
+        var data_log_change = new Array;
+        for (i_data = 1; i_data < data.length; i_data++) {
+            data_log_change.push(math.log(data[i_data]) - math.log(data[i_data - 1]));
+        }
+
+        var data_log_change_config = {
+            type: 'line',
+            data: {
+                labels: data_index,
+                datasets: [{
+                    label: '對數差分值',
+                    borderColor: 'rgba(25, 25, 225, 0.25)',
+                    backgroundColor: 'rgba(25, 25, 225, 0.25)',
+                    radius: 0,
+                    fill: false,
+                    data: data_log_change
+                }]
+            },
+            options: {
+                scales: {
+                    xAxes: [{
+                        display: false
+                    }]
+                }
+            }
+        };
+        var data_log_change_chart = $("#DataLogChangeChart").get(0).getContext("2d");
+        new Chart(data_log_change_chart, data_log_change_config);
+
+        // R/S 計算
+        // --------------------------------------------------------------------------------
+        var rnsn = getRnSnData(calculateRSBasedLog2(data_log_change));
+        var rs = regression(rnsn);
+
+        var rnsn_pred = rs.h;
+        var rnsn_h100 = rs.h100;
+        var rnsn_h50 = rs.h50;
+        var rnsn_h0 = rs.h0;
+
+         $("#HurstExponentValue").text("資料的赫斯特指數為："+ rs.m.toFixed(2));
+        
+
+
+        // 繪製上傳 Data 
+        // --------------------------------------------------------------------------------
+        var data_config = {
+            type: 'scatter',
+            data: {
+                labels: data_index,
+                datasets: [{
+                        label: 'R/S',
+                        borderColor: 'rgba(9, 9, 9, 0.25)',
+                        backgroundColor: 'rgba(9, 9, 9, 0.25)',
+                        // radius: 0,
+                        // fill: false,
+                        data: rnsn
+                    },
+                    {
+                        label: '上傳資料: H=' + rs.m.toFixed(2),
+                        showLine: true,
+                        borderColor: 'rgba(27, 27, 240, 0.25)',
+                        backgroundColor: 'rgba(27, 27, 240, 0.25)',
+                        radius: 0,
+                        fill: false,
+                        data: rnsn_pred
+                    },
+                    {
+                        label: 'H=1 (波動叢聚, 0.5 ~ 1)',
+                        showLine: true,
+                        borderColor: 'rgba(100, 200, 100, 0.5)',
+                        backgroundColor: 'rgba(100, 200, 100, 0.5)',
+                        radius: 0,
+                        fill: false,
+                        data: rnsn_h100
+                    },
+                    {
+                        label: 'H=0.5 (隨機漫步,Random Walk)',
+                        showLine: true,
+                        borderColor: 'rgba(16, 16, 16, 0.5)',
+                        backgroundColor: 'rgba(16, 16, 16, 0.5)',
+                        radius: 0,
+                        fill: false,
+                        data: rnsn_h50
+                    },
+                    {
+                        label: 'H=0 (均值回歸, 0 ~ 0.5)',
+                        showLine: true,
+                        borderColor: 'rgba(255, 16, 16, 0.5)',
+                        backgroundColor: 'rgba(255, 16, 16, 0.5)',
+                        radius: 0,
+                        fill: false,
+                        data: rnsn_h0
+                    }
+                ]
+            }
+        };
+
+        var data_chart = $("#HurstExponentChart").get(0).getContext("2d");
+        new Chart(data_chart, data_config);
+    };
+    reader.onerror = function() { alert('Unable to read ' + file.fileName); };
+}
+</script>
+<!-- javascript goes here -->
+<script type="text/javascript">
+</script>
+
+</html>
