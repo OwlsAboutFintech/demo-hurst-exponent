@@ -30,7 +30,8 @@ window.onbeforeunload = function() {
         <p>3. 在 0.8 以上可嘗試建立傳統時間序列模型，如 ARIMA</p>
         <br/>
         <p>請選擇一個檔案，內容為只有一欄的數字序列，推薦放純粹價格的資料</p>
-        <p>請參考這個 <a href="#">csv 範例</a>，並上傳：</p>
+        <p>請參考這個 <a href="https://github.com/OwlsAboutFintech/demo-hurst-exponent/blob/master/data/random-data.csv">csv 範例</a>，或是下載 <a href="https://github.com/OwlsAboutFintech/demo-hurst-exponent/archive/master.zip">整個範例（資料範例在 data 資料夾）</a></p>
+        <p>上傳檔案：</p>
         <div id="inputs" class="clearfix">
             <input type="file" id="files" name="files[]" multiple />
         </div>
@@ -207,7 +208,7 @@ function printTable(file, global) {
                         data: rnsn_pred
                     },
                     {
-                        label: 'H=1 (波動叢聚, 0.5 ~ 1)',
+                        label: 'H=1',
                         showLine: true,
                         borderColor: 'rgba(100, 200, 100, 0.5)',
                         backgroundColor: 'rgba(100, 200, 100, 0.5)',
@@ -225,7 +226,7 @@ function printTable(file, global) {
                         data: rnsn_h50
                     },
                     {
-                        label: 'H=0 (均值回歸, 0 ~ 0.5)',
+                        label: 'H=0',
                         showLine: true,
                         borderColor: 'rgba(255, 16, 16, 0.5)',
                         backgroundColor: 'rgba(255, 16, 16, 0.5)',
