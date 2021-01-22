@@ -1,6 +1,5 @@
 <!doctype html>
 <html lang="zh-Hant-TW">
-
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -53,7 +52,7 @@
             </nav>
             <div>
                 <div class="content" id="main">
-                    <br<br /><br /><br />
+                    <br/><br /><br /><br />
                     <div class="container">
                         <div class="row">
                             <div class="col-md-12 page-header">
@@ -136,7 +135,35 @@
 <script src="linear-regression.js"></script>
 <script src="hurst-exponent.js"></script>
 <script type="text/javascript">
-var global_tool_name = "Hurst Exponent";
+
+var global_tool_name = 'Hurst Exponent';
+
+$('#save-as-png').click(function(e) {
+    e.preventDefault();
+    var container = document.getElementById("main");
+    html2canvas(container, { allowTaint: true, foreignObjectRendering: true }).then(function(canvas) {
+        var link = document.createElement("a");
+        document.body.appendChild(link);
+        link.download = global_tool_name + ".png";
+        link.href = canvas.toDataURL();
+        link.target = '_blank';
+        link.click();
+    });
+});
+
+$('#save-as-pdf').click(function(e) {
+    e.preventDefault();
+    var doc = new jsPDF("p", "mm", "a4");
+    var width = doc.internal.pageSize.getWidth();
+    var height = doc.internal.pageSize.getHeight();
+    var container = document.getElementById("main");
+    html2canvas(container, { allowTaint: true, foreignObjectRendering: true }).then(function(canvas) {
+        var image = canvas.toDataURL("image/png");
+        doc.addImage(image, 'JPEG', -0.065 * 1.15 * width,
+            20, 1.15 * width, (canvas.height / canvas.width) * 1.15 * width);
+        doc.save(global_tool_name + '.pdf');
+    });
+});
 
 window.onbeforeunload = function() {
     window.scrollTo(0, 0);
@@ -308,31 +335,5 @@ function calulateHurstExponent(file, global) {
     reader.onerror = function() { alert('Unable to read ' + file.fileName); };
 }
 
-$('#save-as-png').click(function(e) {
-    e.preventDefault();
-    var container = document.getElementById("main");
-    html2canvas(container, { allowTaint: true, foreignObjectRendering: true }).then(function(canvas) {
-        var link = document.createElement("a");
-        document.body.appendChild(link);
-        link.download = global_tool_name + ".png";
-        link.href = canvas.toDataURL();
-        link.target = '_blank';
-        link.click();
-    });
-});
-
-$('#save-as-pdf').click(function(e) {
-    e.preventDefault();
-    var doc = new jsPDF("p", "mm", "a4");
-    var width = doc.internal.pageSize.getWidth();
-    var height = doc.internal.pageSize.getHeight();
-    var container = document.getElementById("main");
-    html2canvas(container, { allowTaint: true, foreignObjectRendering: true }).then(function(canvas) {
-        var image = canvas.toDataURL("image/png");
-        doc.addImage(image, 'JPEG', -0.065 * 1.15 * width,
-            20, 1.15 * width, (canvas.height / canvas.width) * 1.15 * width);
-        doc.save(global_tool_name + '.pdf');
-    });
-});
 </script>
 </html>
