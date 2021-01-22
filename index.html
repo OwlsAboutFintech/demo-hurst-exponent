@@ -1,90 +1,156 @@
 <!doctype html>
-<html>
-<script type="text/javascript">
-window.onbeforeunload = function() {
-    window.scrollTo(0, 0);
-}
-</script>
+<html lang="zh-Hant-TW">
 
 <head>
-    <meta charset="utf-8" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>赫斯特指數值計算器 Hurst Exponent Calculator</title>
+    <link href="assets/vendor/fontawesome/css/fontawesome.min.css" rel="stylesheet">
+    <link href="assets/vendor/fontawesome/css/solid.min.css" rel="stylesheet">
+    <link href="assets/vendor/fontawesome/css/brands.min.css" rel="stylesheet">
+    <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/css/master.css" rel="stylesheet">
+    <link href="assets/vendor/chartsjs/Chart.min.css" rel="stylesheet">
+    <link href="assets/vendor/flagiconcss/css/flag-icon.min.css" rel="stylesheet">
 </head>
 
 <body>
-    <div style="margin:0px auto;width:61.8%;">
-        <br />
-        <h1 align="center">赫斯特指數值計算器 Hurst Exponent Calculator</h1>
-        <br />
-        <p><b>赫斯特指數(Hurst Exponent) </b>可以特別來評估金融市場資料 <b>波動叢聚 (Volatility Clustering)</b> 的特性</p>
-        <br/>
-        <p>赫斯特指數若大於 0.5 ，越接近 1 就代表可能會觀察到更明顯的波動叢聚現象，但波動的均值回歸週期越長且不固定，適合看做隨機波動</p>
-        <p>赫斯特指數若接近 0.5 ，代表資料的前後波動沒有相關性，資料的漲跌幅度可能幾乎是隨機變化，較適合看作是常數波動</p>
-        <p>赫斯特指數若小於 0.5 ，越接近 0 也可以觀察到些微的波動叢聚現象，但此時波動的均值回歸週期越短且固定，不適合看做隨機波動</p>
-        <br/>
-        <p>赫斯特指數有許多種計算方法，且容易受到資料量影響，本計算器以 R/S 法計算，以 2 為底數進行計算</p>
-        <p>推薦選擇不同標的，但相同的時間尺度且資料大致都在 512 至 4096 筆左右研究</p>
-        <p>依上述推薦計算：</p>
-        <p>1. 在 0.3 - 0.5 可看做是隨機遊走（Random Walk）</p>
-        <p>2. 在 0.5 - 0.8 可嘗試建立波動率模型，如 GARCH</p>
-        <p>3. 在 0.8 以上可嘗試建立傳統時間序列模型，如 ARIMA</p>
-        <br/>
-        <p>請選擇一個檔案，內容為只有一欄的數字序列，推薦放純粹價格的資料</p>
-        <p>請參考這個 <a href="https://github.com/OwlsAboutFintech/demo-hurst-exponent/blob/master/data/random-data.csv">csv 範例</a>，或是下載 <a href="https://github.com/OwlsAboutFintech/demo-hurst-exponent/archive/master.zip">整個範例（資料範例在 data 資料夾）</a></p>
-        <p>上傳檔案：</p>
-        <div id="inputs" class="clearfix">
-            <input type="file" id="files" name="files[]" multiple />
+    <div class="wrapper">
+        <div id="body" class="active">
+            <nav class="navbar navbar-expand-lg navbar-white bg-white">
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item dropdown">
+                            <div class="nav-dropdown">
+                                <a href="" class="nav-item nav-link dropdown-toggle text-secondary" data-toggle="dropdown" id="download-list"><i class="fas fa-arrow-circle-down"></i><span>　下載　</span></a>
+                                <div class="dropdown-menu dropdown-menu-right nav-link-menu">
+                                    <ul class="nav-list">
+                                        <li><a href="" class="dropdown-item" id="save-as-pdf"><i class="fas fa-list"></i> 下載為 PDF 檔案</a></li>
+                                        <li><a href="" class="dropdown-item" id="save-as-png"><i class="fas fa-image"></i> 下載為 PNG 圖片</a></li>
+                                        <div class="dropdown-divider"></div>
+                                        <li><a href="https://github.com/OwlsAboutFintech/demo-hurst-exponent/archive/master.zip" class="dropdown-item"><i class="fas fa-cloud-download-alt"></i> 下載工具 (可離線使用)</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <div class="nav-dropdown">
+                                <a href="" class="nav-item nav-link dropdown-toggle text-secondary" data-toggle="dropdown"><i class="fas fa-info-circle"></i><span>　資訊　</span></a>
+                                <div class="dropdown-menu dropdown-menu-right nav-link-menu">
+                                    <ul class="nav-list">
+                                        <li><a href="http://www.o14h.com" class="dropdown-item"><i class="fas fa-smile"></i>　關於我們</a></li>
+                                        <div class="dropdown-divider"></div>
+                                        <li><a href="https://www.facebook.com/OwlsAboutFintech" class="dropdown-item"><i class="fab fa-facebook-messenger"></i>　許願你想要的工具</a></li>
+                                        <li><a href="https://www.facebook.com/groups/840713936495332" class="dropdown-item"><i class="fas fa-users"></i>　看別人怎麼用工具</a></li>
+                                        <li><a href="https://www.instagram.com/owlsaboutfintech" class="dropdown-item"><i class="fas fa-image"></i>　每日精選的金融圖表</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+            <div>
+                <div class="content" id="main">
+                    <br<br /><br /><br />
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-md-12 page-header">
+                                <h2 class="page-title">赫斯特指數值計算器 Hurst Exponent Calculator</h2><br />
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="card">
+                                    <div class="content">
+                                        <div class="head">
+                                            <h5 class="mb-0">赫斯特指數值</h5>
+                                            <p class="text-muted">Hurst Exponent Value</p>
+                                        </div>
+                                        <div class="canvas-wrapper">
+                                            <div style="font-size:35px" id="HurstExponentValue"></div>
+                                            <br />
+                                            <canvas height="147px" id="HurstExponentChart"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card">
+                                    <div class="content">
+                                        <div class="head">
+                                            <h5 class="mb-0">參數設定</h5>
+                                            <p class="text-muted">Parameter Setting</p>
+                                            <p style="font-size:15px;">上傳檔案：<input type="file" id="files" name="files[]" /></p>
+                                            <canvas height="150px" id="UploadDataChart"></canvas>
+                                            <br />
+                                            <canvas height="150px" id="DataLogChangeChart"></canvas>
+                                        </div>
+                                        <div class="canvas-wrapper">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <p><b>赫斯特指數(Hurst Exponent) </b>可以特別來評估金融市場資料 <b>波動叢聚 (Volatility Clustering)</b> 的特性</p>
+                                                <br />
+                                                <p>赫斯特指數若大於 0.5 ，越接近 1 就代表可能會觀察到更明顯的波動叢聚現象，但波動的均值回歸週期越長且不固定，適合看做隨機波動</p>
+                                                <p>赫斯特指數若接近 0.5 ，代表資料的前後波動沒有相關性，資料的漲跌幅度可能幾乎是隨機變化，較適合看作是常數波動</p>
+                                                <p>赫斯特指數若小於 0.5 ，越接近 0 也可以觀察到些微的波動叢聚現象，但此時波動的均值回歸週期越短且固定，不適合看做隨機波動</p>
+                                                <br />
+                                                <p>赫斯特指數有許多種計算方法，且容易受到資料量影響，本計算器以 R/S 法計算，以 2 為底數進行計算</p>
+                                                <p>推薦選擇不同標的，但相同的時間尺度且資料大致都在 512 至 4096 筆左右研究</p>
+                                                <p>依上述推薦計算：</p>
+                                                <p>1. 在 0.3 - 0.5 可看做是隨機遊走（Random Walk）</p>
+                                                <p>2. 在 0.5 - 0.8 可嘗試建立波動率模型，如 GARCH</p>
+                                                <p>3. 在 0.8 以上可嘗試建立傳統時間序列模型，如 ARIMA</p>
+                                                <br />
+                                                <p>請選擇一個檔案，內容為只有一欄的數字序列，推薦放純粹價格的資料，並參考這個 <a href="https://github.com/OwlsAboutFintech/demo-hurst-exponent/blob/master/data/random-data.csv"><u>csv 範例</u></a>，或是下載 <a href="https://github.com/OwlsAboutFintech/demo-hurst-exponent/archive/master.zip"><u>整個範例（資料範例在 data 資料夾）</u></a></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <br />
-        <br />
-        <hr />
-        <br />
-        <div style="font-size:35px" id="HurstExponentValue"></div>
-        <br />
-        <canvas height="150px" id="HurstExponentChart"></canvas>
-        <br />
-        <hr />
-        <canvas height="81px" id="UploadDataChart"></canvas>
-        <br />
-        <canvas height="36px" id="DataLogChangeChart"></canvas>
-    </div>
 </body>
-<script src="chart-2.7.1.min.js"></script>
-<script src="math-3.16.5.min.js"></script>
-<script src="jquery-3.2.1.min.js"></script>
-<script src="jquery-csv-0.8.3.min.js"></script>
+<script src="assets/vendor/jquery/jquery.min.js"></script>
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script src="assets/vendor/chartsjs/Chart.min.js"></script>
+<script src="assets/js/dashboard-charts.js"></script>
+<script src="assets/js/script.js"></script>
+<script src="assets/vendor/mathjs/math-3.16.5.min.js"></script>
+<script src="assets/vendor/html2canvas/html2canvas.min.js"></script>
+<script src="assets/vendor/jspdf/jspdf.min.js"></script>
+<script src="assets/vendor/jquerycsv/jquery-csv-0.8.3.min.js"></script>
 <script src="linear-regression.js"></script>
 <script src="hurst-exponent.js"></script>
-<script>
+<script type="text/javascript">
+var global_tool_name = "Hurst Exponent";
+
+window.onbeforeunload = function() {
+    window.scrollTo(0, 0);
+}
 
 $(document).ready(function(global) {
     $('#files').bind('change', handleFileSelect);
 });
 
-function get_weight(global) {
-    lenet_get_weight(net);
-}
-
-
 function handleFileSelect(evt, global) {
-    printTable(evt.target.files[0], global);
+    calulateHurstExponent(evt.target.files[0], global);
 }
 
-var net = null; // declared outside -> global variable in window scope
-function clickLog(global) {
-    var batch = data_processing(global_data, global_label, 1, 40, 1);
-    var fitness_batch = data_processing(global_data, global_label, 1, 40, 1);
-    var batch_data = batch[0];
-    var batch_label = batch[1];
-    var batch_index = batch[2];
-    var fitness_batch_data = fitness_batch[0];
-    var batch_gramian_matrix = gramian_cos_batch(batch_data);
-    var fitness_batch_matrix = gramian_cos_batch(fitness_batch_data);
-    lenet_start(net, batch_gramian_matrix, fitness_batch_matrix, batch_label, batch_index);
-}
-
-
-function printTable(file, global) {
+function calulateHurstExponent(file, global) {
 
     var reader = new FileReader();
     reader.readAsText(file);
@@ -151,7 +217,7 @@ function printTable(file, global) {
             data: {
                 labels: data_index,
                 datasets: [{
-                    label: '對數差分值',
+                    label: '對數差分值 (漲跌幅)',
                     borderColor: 'rgba(25, 25, 225, 0.25)',
                     backgroundColor: 'rgba(25, 25, 225, 0.25)',
                     radius: 0,
@@ -180,9 +246,7 @@ function printTable(file, global) {
         var rnsn_h50 = rs.h50;
         var rnsn_h0 = rs.h0;
 
-         $("#HurstExponentValue").text("資料的赫斯特指數為："+ rs.m.toFixed(2));
-        
-
+        $("#HurstExponentValue").text("資料的赫斯特指數為：" + rs.m.toFixed(2));
 
         // 繪製上傳 Data 
         // --------------------------------------------------------------------------------
@@ -243,9 +307,32 @@ function printTable(file, global) {
     };
     reader.onerror = function() { alert('Unable to read ' + file.fileName); };
 }
-</script>
-<!-- javascript goes here -->
-<script type="text/javascript">
-</script>
 
+$('#save-as-png').click(function(e) {
+    e.preventDefault();
+    var container = document.getElementById("main");
+    html2canvas(container, { allowTaint: true, foreignObjectRendering: true }).then(function(canvas) {
+        var link = document.createElement("a");
+        document.body.appendChild(link);
+        link.download = global_tool_name + ".png";
+        link.href = canvas.toDataURL();
+        link.target = '_blank';
+        link.click();
+    });
+});
+
+$('#save-as-pdf').click(function(e) {
+    e.preventDefault();
+    var doc = new jsPDF("p", "mm", "a4");
+    var width = doc.internal.pageSize.getWidth();
+    var height = doc.internal.pageSize.getHeight();
+    var container = document.getElementById("main");
+    html2canvas(container, { allowTaint: true, foreignObjectRendering: true }).then(function(canvas) {
+        var image = canvas.toDataURL("image/png");
+        doc.addImage(image, 'JPEG', -0.065 * 1.15 * width,
+            20, 1.15 * width, (canvas.height / canvas.width) * 1.15 * width);
+        doc.save(global_tool_name + '.pdf');
+    });
+});
+</script>
 </html>
