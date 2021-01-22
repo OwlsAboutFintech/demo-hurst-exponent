@@ -1,10 +1,12 @@
 <!doctype html>
 <html lang="zh-Hant-TW">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>赫斯特指數值計算器 Hurst Exponent Calculator</title>
+    <link rel="Shortcut Icon" type="image/x-icon" href="favicon.ico" />
     <link href="assets/vendor/fontawesome/css/fontawesome.min.css" rel="stylesheet">
     <link href="assets/vendor/fontawesome/css/solid.min.css" rel="stylesheet">
     <link href="assets/vendor/fontawesome/css/brands.min.css" rel="stylesheet">
@@ -52,7 +54,24 @@
             </nav>
             <div>
                 <div class="content" id="main">
-                    <br/><br /><br /><br />
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-md-12 page-header">
+                                <br /><br />
+                                <span>
+                                    範例：
+                                    <button type="button" class="btn btn-secondary mb-2" id="demo-random-data">0~1 隨機數</button>　
+                                    <button type="button" class="btn btn-secondary mb-2" id="demo-random-walk">隨機漫步</button>　
+                                    <button type="button" class="btn btn-secondary mb-2" id="demo-high-corr-2">隨機飄移</button>　
+                                    <button type="button" class="btn btn-info mb-2" id="demo-gold-2009-2016">黃金 2009-2016</button>　
+                                    <button type="button" class="btn btn-info mb-2" id="demo-usdjpy-m5-201602">美元日圓 (五分鐘) 2016.2</button>　
+                                    <button type="button" class="btn btn-secondary mb-2" id="demo-linear-inc-vol">增加波動</button>　
+                                    <button type="button" class="btn btn-secondary mb-2" id="demo-linear-dec-vol">減少波動</button>
+                                </span>
+                                <br />
+                            </div>
+                        </div>
+                    </div>
                     <div class="container">
                         <div class="row">
                             <div class="col-md-12 page-header">
@@ -135,7 +154,6 @@
 <script src="linear-regression.js"></script>
 <script src="hurst-exponent.js"></script>
 <script type="text/javascript">
-
 var global_tool_name = 'Hurst Exponent';
 
 $('#save-as-png').click(function(e) {
@@ -173,11 +191,77 @@ $(document).ready(function(global) {
     $('#files').bind('change', handleFileSelect);
 });
 
+$("#demo-random-walk").click(function(global) {
+    $.ajax({
+        type: "GET",
+        url: "https://raw.githubusercontent.com/OwlsAboutFintech/demo-hurst-exponent/master/data/random-walk.csv",
+        dataType: "text",
+        success: function(data) { calculateHurstExponent($.csv.toArrays(data), '隨機漫步 (範例)'); }
+    });
+});
+
+$("#demo-random-data").click(function(global) {
+    $.ajax({
+        type: "GET",
+        url: "https://raw.githubusercontent.com/OwlsAboutFintech/demo-hurst-exponent/master/data/random-data.csv",
+        dataType: "text",
+        success: function(data) { calculateHurstExponent($.csv.toArrays(data), '0~1 隨機數 (範例)'); }
+    });
+});
+
+$("#demo-gold-2009-2016").click(function(global) {
+    $.ajax({
+        type: "GET",
+        url: "https://raw.githubusercontent.com/OwlsAboutFintech/demo-hurst-exponent/master/data/GOLD_2009_2016.csv",
+        dataType: "text",
+        success: function(data) { calculateHurstExponent($.csv.toArrays(data), '黃金 2009~2016 (範例)'); }
+    });
+});
+
+$("#demo-usdjpy-m5-201602").click(function(global) {
+    $.ajax({
+        type: "GET",
+        url: "https://raw.githubusercontent.com/OwlsAboutFintech/demo-hurst-exponent/master/data/201602_USDJPY_M5.csv",
+        dataType: "text",
+        success: function(data) { calculateHurstExponent($.csv.toArrays(data), '美元日圓 (五分鐘) 2016.2 (範例)'); }
+    });
+});
+
+$("#demo-high-corr-2").click(function(global) {
+    $.ajax({
+        type: "GET",
+        url: "https://raw.githubusercontent.com/OwlsAboutFintech/demo-hurst-exponent/master/data/high-corr-2.csv",
+        dataType: "text",
+        success: function(data) { calculateHurstExponent($.csv.toArrays(data), '隨機飄移 (範例)'); }
+    });
+});
+
+$("#demo-linear-inc-vol").click(function(global) {
+    $.ajax({
+        type: "GET",
+        url: "https://raw.githubusercontent.com/OwlsAboutFintech/demo-hurst-exponent/master/data/linear-inc-vol.csv",
+        dataType: "text",
+        success: function(data) { calculateHurstExponent($.csv.toArrays(data), '增加波動 (範例)'); }
+    });
+});
+
+$("#demo-linear-dec-vol").click(function(global) {
+    $.ajax({
+        type: "GET",
+        url: "https://raw.githubusercontent.com/OwlsAboutFintech/demo-hurst-exponent/master/data/linear-dec-vol.csv",
+        dataType: "text",
+        success: function(data) { calculateHurstExponent($.csv.toArrays(data), '減少波動 (範例)'); }
+    });
+});
+
+
+
+
 function handleFileSelect(evt, global) {
-    calulateHurstExponent(evt.target.files[0], global);
+    calculateFromFile(evt.target.files[0], global);
 }
 
-function calulateHurstExponent(file, global) {
+function calculateFromFile(file, global) {
 
     var reader = new FileReader();
     reader.readAsText(file);
@@ -188,152 +272,157 @@ function calulateHurstExponent(file, global) {
         var filename = file.name.split('.').slice(0, -1).join('.');
         var csv = event.target.result;
         var data = $.csv.toArrays(csv);
-        var dim_data = data[0].length;
-        var n_data = data.length;
-        var data_matrix = math.zeros(n_data, dim_data);
-        var html = '';
-        for (var row in data) {
-            html += '<tr>\r\n';
-            for (var item in data[row]) {
-                html += '<td>' + data[row][item] + '</td>\r\n';
-                data_matrix = math.subset(data_matrix, math.index(parseInt(row), parseInt(item)), parseFloat(data[row][item]));
-            }
-            html += '</tr>\r\n';
-        }
-        $('#contents').html(html);
-
-        // 讀取 csv 資料
-        // --------------------------------------------------------------------------------
-        var data_index = Array.from(Array(n_data).keys());
-        var data_value = data_matrix.subset(math.index(data_index, 0));
-        var data = math.transpose(data_value)._data[0];
-
-        var data_config = {
-            type: 'line',
-            data: {
-                labels: data_index,
-                datasets: [{
-                    label: filename,
-                    borderColor: 'rgba(9, 9, 196, 0.25)',
-                    backgroundColor: 'rgba(9, 9, 196, 0.25)',
-                    radius: 0,
-                    fill: false,
-                    data: data
-                }]
-            },
-            options: {
-                scales: {
-                    xAxes: [{
-                        display: false
-                    }]
-                }
-            }
-        };
-        var data_chart = $("#UploadDataChart").get(0).getContext("2d");
-        new Chart(data_chart, data_config);
-
-        // 計算對數差分
-        // --------------------------------------------------------------------------------
-        var data_log_change = new Array;
-        for (i_data = 1; i_data < data.length; i_data++) {
-            data_log_change.push(math.log(data[i_data]) - math.log(data[i_data - 1]));
-        }
-
-        var data_log_change_config = {
-            type: 'line',
-            data: {
-                labels: data_index,
-                datasets: [{
-                    label: '對數差分值 (漲跌幅)',
-                    borderColor: 'rgba(25, 25, 225, 0.25)',
-                    backgroundColor: 'rgba(25, 25, 225, 0.25)',
-                    radius: 0,
-                    fill: false,
-                    data: data_log_change
-                }]
-            },
-            options: {
-                scales: {
-                    xAxes: [{
-                        display: false
-                    }]
-                }
-            }
-        };
-        var data_log_change_chart = $("#DataLogChangeChart").get(0).getContext("2d");
-        new Chart(data_log_change_chart, data_log_change_config);
-
-        // R/S 計算
-        // --------------------------------------------------------------------------------
-        var rnsn = getRnSnData(calculateRSBasedLog2(data_log_change));
-        var rs = regression(rnsn);
-
-        var rnsn_pred = rs.h;
-        var rnsn_h100 = rs.h100;
-        var rnsn_h50 = rs.h50;
-        var rnsn_h0 = rs.h0;
-
-        $("#HurstExponentValue").text("資料的赫斯特指數為：" + rs.m.toFixed(2));
-
-        // 繪製上傳 Data 
-        // --------------------------------------------------------------------------------
-        var data_config = {
-            type: 'scatter',
-            data: {
-                labels: data_index,
-                datasets: [{
-                        label: 'R/S',
-                        borderColor: 'rgba(9, 9, 9, 0.25)',
-                        backgroundColor: 'rgba(9, 9, 9, 0.25)',
-                        // radius: 0,
-                        // fill: false,
-                        data: rnsn
-                    },
-                    {
-                        label: '上傳資料: H=' + rs.m.toFixed(2),
-                        showLine: true,
-                        borderColor: 'rgba(27, 27, 240, 0.25)',
-                        backgroundColor: 'rgba(27, 27, 240, 0.25)',
-                        radius: 0,
-                        fill: false,
-                        data: rnsn_pred
-                    },
-                    {
-                        label: 'H=1',
-                        showLine: true,
-                        borderColor: 'rgba(100, 200, 100, 0.5)',
-                        backgroundColor: 'rgba(100, 200, 100, 0.5)',
-                        radius: 0,
-                        fill: false,
-                        data: rnsn_h100
-                    },
-                    {
-                        label: 'H=0.5 (隨機漫步,Random Walk)',
-                        showLine: true,
-                        borderColor: 'rgba(16, 16, 16, 0.5)',
-                        backgroundColor: 'rgba(16, 16, 16, 0.5)',
-                        radius: 0,
-                        fill: false,
-                        data: rnsn_h50
-                    },
-                    {
-                        label: 'H=0',
-                        showLine: true,
-                        borderColor: 'rgba(255, 16, 16, 0.5)',
-                        backgroundColor: 'rgba(255, 16, 16, 0.5)',
-                        radius: 0,
-                        fill: false,
-                        data: rnsn_h0
-                    }
-                ]
-            }
-        };
-
-        var data_chart = $("#HurstExponentChart").get(0).getContext("2d");
-        new Chart(data_chart, data_config);
+        calculateHurstExponent(data, filename);
     };
     reader.onerror = function() { alert('Unable to read ' + file.fileName); };
 }
 
+function calculateHurstExponent(data, filename) {
+    var dim_data = data[0].length;
+    var n_data = data.length;
+    var data_matrix = math.zeros(n_data, dim_data);
+    var html = '';
+    for (var row in data) {
+        html += '<tr>\r\n';
+        for (var item in data[row]) {
+            html += '<td>' + data[row][item] + '</td>\r\n';
+            data_matrix = math.subset(data_matrix, math.index(parseInt(row), parseInt(item)), parseFloat(data[row][item]));
+        }
+        html += '</tr>\r\n';
+    }
+    $('#contents').html(html);
+
+    // 讀取 csv 資料
+    // --------------------------------------------------------------------------------
+    var data_index = Array.from(Array(n_data).keys());
+    var data_value = data_matrix.subset(math.index(data_index, 0));
+    var data = math.transpose(data_value)._data[0];
+
+    var data_config = {
+        type: 'line',
+        data: {
+            labels: data_index,
+            datasets: [{
+                label: filename,
+                borderColor: 'rgba(9, 9, 196, 0.25)',
+                backgroundColor: 'rgba(9, 9, 196, 0.25)',
+                radius: 0,
+                fill: false,
+                data: data
+            }]
+        },
+        options: {
+            scales: {
+                xAxes: [{
+                    display: false
+                }]
+            }
+        }
+    };
+    var data_chart = $("#UploadDataChart").get(0).getContext("2d");
+    new Chart(data_chart, data_config);
+
+    // 計算對數差分
+    // --------------------------------------------------------------------------------
+    var data_log_change = new Array;
+    for (i_data = 1; i_data < data.length; i_data++) {
+        data_log_change.push(math.log(data[i_data]) - math.log(data[i_data - 1]));
+    }
+
+    var data_log_change_config = {
+        type: 'line',
+        data: {
+            labels: data_index,
+            datasets: [{
+                label: '對數差分值 (漲跌幅)',
+                borderColor: 'rgba(25, 25, 225, 0.25)',
+                backgroundColor: 'rgba(25, 25, 225, 0.25)',
+                radius: 0,
+                fill: false,
+                data: data_log_change
+            }]
+        },
+        options: {
+            scales: {
+                xAxes: [{
+                    display: false
+                }]
+            }
+        }
+    };
+    var data_log_change_chart = $("#DataLogChangeChart").get(0).getContext("2d");
+    new Chart(data_log_change_chart, data_log_change_config);
+
+    // R/S 計算
+    // --------------------------------------------------------------------------------
+    var rnsn = getRnSnData(calculateRSBasedLog2(data_log_change));
+    var rs = regression(rnsn);
+
+    var rnsn_pred = rs.h;
+    var rnsn_h100 = rs.h100;
+    var rnsn_h50 = rs.h50;
+    var rnsn_h0 = rs.h0;
+
+    $("#HurstExponentValue").text("資料的赫斯特指數為：" + rs.m.toFixed(2));
+
+    // 繪製上傳 Data 
+    // --------------------------------------------------------------------------------
+    var data_config = {
+        type: 'scatter',
+        data: {
+            labels: data_index,
+            datasets: [{
+                    label: 'R/S',
+                    borderColor: 'rgba(9, 9, 9, 0.25)',
+                    backgroundColor: 'rgba(9, 9, 9, 0.25)',
+                    // radius: 0,
+                    // fill: false,
+                    data: rnsn
+                },
+                {
+                    label: '上傳資料: H=' + rs.m.toFixed(2),
+                    showLine: true,
+                    borderColor: 'rgba(27, 27, 240, 0.25)',
+                    backgroundColor: 'rgba(27, 27, 240, 0.25)',
+                    radius: 0,
+                    fill: false,
+                    data: rnsn_pred
+                },
+                {
+                    label: 'H=1',
+                    showLine: true,
+                    borderColor: 'rgba(100, 200, 100, 0.5)',
+                    backgroundColor: 'rgba(100, 200, 100, 0.5)',
+                    radius: 0,
+                    fill: false,
+                    data: rnsn_h100
+                },
+                {
+                    label: 'H=0.5 (隨機漫步,Random Walk)',
+                    showLine: true,
+                    borderColor: 'rgba(16, 16, 16, 0.5)',
+                    backgroundColor: 'rgba(16, 16, 16, 0.5)',
+                    radius: 0,
+                    fill: false,
+                    data: rnsn_h50
+                },
+                {
+                    label: 'H=0',
+                    showLine: true,
+                    borderColor: 'rgba(255, 16, 16, 0.5)',
+                    backgroundColor: 'rgba(255, 16, 16, 0.5)',
+                    radius: 0,
+                    fill: false,
+                    data: rnsn_h0
+                }
+            ]
+        }
+    };
+
+    var data_chart = $("#HurstExponentChart").get(0).getContext("2d");
+    new Chart(data_chart, data_config);
+
+}
 </script>
+
 </html>
